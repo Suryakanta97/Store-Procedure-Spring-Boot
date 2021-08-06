@@ -1,0 +1,129 @@
+
+////////////////////////////////////////////////////////////////////////////////////////////
+    
+    CREATE TABLE BOOKS 
+(
+  ID NUMBER GENERATED ALWAYS AS IDENTITY INCREMENT BY 1 MAXVALUE 9999999999999999999999999999 MINVALUE 1 CACHE 20 NOT NULL 
+, NAME VARCHAR2(100 BYTE) NOT NULL 
+, PRICE NUMBER(15, 2) NOT NULL 
+, CONSTRAINT BOOK_PK PRIMARY KEY 
+  (
+    ID 
+  )
+  USING INDEX 
+  (
+      CREATE UNIQUE INDEX BOOK_PK ON BOOKS (ID ASC) 
+      LOGGING 
+      TABLESPACE USERS 
+      PCTFREE 10 
+      INITRANS 2 
+      STORAGE 
+      ( 
+        INITIAL 65536 
+        NEXT 1048576 
+        MINEXTENTS 1 
+        MAXEXTENTS UNLIMITED 
+        BUFFER_POOL DEFAULT 
+      ) 
+      NOPARALLEL 
+  )
+  ENABLE 
+) 
+LOGGING 
+TABLESPACE USERS 
+PCTFREE 10 
+INITRANS 1 
+STORAGE 
+( 
+  INITIAL 65536 
+  NEXT 1048576 
+  MINEXTENTS 1 
+  MAXEXTENTS UNLIMITED 
+  BUFFER_POOL DEFAULT 
+) 
+NOCOMPRESS 
+NO INMEMORY 
+NOPARALLEL;
+    
+    
+////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+CREATE TABLE PRODUCT 
+(
+  ID VARCHAR2(255 CHAR) NOT NULL 
+, CODE VARCHAR2(255 CHAR) 
+, NAME VARCHAR2(255 CHAR) 
+, WEIGHT NUMBER(19, 2) 
+, CONSTRAINT SYS_C0010985 PRIMARY KEY 
+  (
+    ID 
+  )
+  USING INDEX 
+  (
+      CREATE UNIQUE INDEX SYS_C0010985 ON PRODUCT (ID ASC) 
+      LOGGING 
+      TABLESPACE USERS 
+      PCTFREE 10 
+      INITRANS 2 
+      STORAGE 
+      ( 
+        INITIAL 65536 
+        NEXT 1048576 
+        MINEXTENTS 1 
+        MAXEXTENTS UNLIMITED 
+        BUFFER_POOL DEFAULT 
+      ) 
+      NOPARALLEL 
+  )
+  ENABLE 
+) 
+LOGGING 
+TABLESPACE USERS 
+PCTFREE 10 
+INITRANS 1 
+STORAGE 
+( 
+  INITIAL 65536 
+  NEXT 1048576 
+  MINEXTENTS 1 
+  MAXEXTENTS UNLIMITED 
+  BUFFER_POOL DEFAULT 
+) 
+NOCOMPRESS 
+NO INMEMORY 
+NOPARALLEL;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+create or replace NONEDITIONABLE PROCEDURE  create_product ( id IN product.id%TYPE,
+                                                                p_code IN product.code%TYPE,
+                                                                p_name IN product.name%TYPE,
+                                                                weight IN product.weight%TYPE
+                                                                )
+    AS
+    BEGIN
+	INSERT INTO product(id, CODE,NAME,weight) VALUES(id,p_code,p_name,weight);
+    
+    END create_product;
+    
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    
+    create or replace NONEDITIONABLE PROCEDURE get_book_by_id  (  p_id IN BOOKS.ID%TYPE,  o_name OUT BOOKS.NAME%TYPE,  o_price OUT BOOKS.PRICE%TYPE ) AS BEGIN  SELECT NAME, PRICE INTO o_name, o_price from BOOKS WHERE ID = p_id; END;
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    
+    create or replace NONEDITIONABLE PROCEDURE get_book_by_name  (  p_name IN BOOKS.NAME%TYPE,  o_c_book OUT SYS_REFCURSOR ) AS BEGIN  OPEN o_c_book FOR  SELECT * FROM BOOKS WHERE NAME LIKE '%' || p_name || '%'; END;
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    
+    create or replace NONEDITIONABLE FUNCTION count_product  RETURN NUMBER  is v_count number(20); BEGIN SELECT COUNT(1) INTO v_count FROM product;  RETURN(v_count); END;
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    
+    create or replace NONEDITIONABLE FUNCTION get_price_by_id(p_id IN BOOKS.ID%TYPE)  RETURN NUMBER IS o_price BOOKS.PRICE%TYPE; BEGIN  SELECT PRICE INTO o_price from BOOKS WHERE ID = p_id;  RETURN(o_price); END;
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    
+    create or replace NONEDITIONABLE FUNCTION get_database_time  RETURN VARCHAR2 IS o_date VARCHAR2(20); BEGIN  SELECT TO_CHAR(SYSDATE, 'DD-MON-YYYY HH:MI:SS') INTO o_date FROM dual;  RETURN(o_date); END;
+    
