@@ -22,12 +22,13 @@ public class DatabaseUtils {
     CallableStatement callableStatement;
 
     private DataSource dataSource;
-
+    
     @Autowired
-    @Qualifier("data_mysql")
+    @Qualifier("data_oracle")
     public void setDataSource(DataSource dataSource){
         this.dataSource=dataSource;
     }
+
     public Object callStoredFunction(int sqlReturnType, String functionName, Object[] params){
         try {
             callableStatement= dataSource.getConnection()

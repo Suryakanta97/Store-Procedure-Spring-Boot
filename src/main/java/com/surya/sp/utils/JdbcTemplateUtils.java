@@ -21,14 +21,15 @@ import java.util.Map;
 @Component
 public class JdbcTemplateUtils {
     Logger logger = LoggerFactory.getLogger(JdbcTemplateUtils.class);
+    
     private SimpleJdbcCall simpleJdbcCall;
-
-    @Autowired
-    @Qualifier("data_mysql")
-    public void setDatasource(DataSource datasource){
-        this.simpleJdbcCall =new SimpleJdbcCall(datasource);
-    }
+    
+    @Autowired(required=true)
+    @Qualifier("data_oracle")
+    DataSource datasource;
+    
     public void callStoreProcedure(String procedureName, Map<String,Object> parameters){
+    	simpleJdbcCall =new SimpleJdbcCall(datasource);
         simpleJdbcCall.withProcedureName(procedureName);
         MapSqlParameterSource inParams = new MapSqlParameterSource();
         if(null!=parameters) {
@@ -41,7 +42,8 @@ public class JdbcTemplateUtils {
     }
 
     public Object callStoredFunction(String functionName, Map<String,Object> parameters, Class<?> classreturn){
-        simpleJdbcCall.withFunctionName(functionName);
+    	simpleJdbcCall =new SimpleJdbcCall(datasource);
+    	simpleJdbcCall.withFunctionName(functionName);
         simpleJdbcCall.withReturnValue();
         MapSqlParameterSource inParams = new MapSqlParameterSource();
         if(null!=parameters) {
@@ -53,8 +55,9 @@ public class JdbcTemplateUtils {
         return simpleJdbcCall.executeFunction(classreturn,inParams);
     }
     
-    public Object callStoredRefFunction(String functionName, String reffunction, Map<String,Object> parameters, Class<?> classreturn){
-        simpleJdbcCall.withProcedureName(functionName);
+    public Object callStoredRefFunction(String procedureName, String reffunction, Map<String,Object> parameters, Class<?> classreturn){
+    	simpleJdbcCall =new SimpleJdbcCall(datasource);
+    	simpleJdbcCall.withProcedureName(procedureName);
         simpleJdbcCall.returningResultSet(reffunction, BeanPropertyRowMapper.newInstance(classreturn));
         MapSqlParameterSource inParams = new MapSqlParameterSource();
         if(null!=parameters) {
@@ -62,7 +65,7 @@ public class JdbcTemplateUtils {
                 inParams.addValue(parameter.getKey(), parameter.getValue());
             }
         }
-        logger.info("FUNCTION {} IS CALLED",functionName);
+        logger.info("PROCEDURE {} IS CALLED",procedureName);
         Map out = simpleJdbcCall.execute(inParams);
         if (out == null) {
             return Collections.emptyList();
